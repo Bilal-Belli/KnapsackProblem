@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="./icon/logo.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js" integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
+    <title>TP1 TPRO Déroulement</title>
+</head>
+<body>
+    <nav class="navbar navbar-light bg-dark">
+        <div class="container-fluid justify-content-center">
+            <span class="navbar-brand mb-0 h1">
+                <a href="./index.html">
+                    <button type="button" class="btn btn-outline-light">Retour</button>
+                </a>
+            </span>
+        </div>
+    </nav>
+    <div class="container p-3">
+        <div class="row">
+            <div class="col-5">
+                <div class="row">
+                    <div class="input-group mb-3">
+                        <span class="input-group-text" id="poidMaxLabel">Entrer le poid maximal</span>
+                        <input type="number" min="1" max="100000" class="form-control" id="poidMax" required>
+                        <span class="input-group-text">Kg</span>
+                    </div>
+                </div>
+                <div class="row">
+                    <button type="button" id="createTableOfEffectivesID" class="btn btn-outline-dark" onclick="createTableOfEffectives()">Ajouter un Objet</button>
+                </div>
+                <div class="row p-3">
+                    <table class="table table-bordered table-responsive" id="tableOfEffictives">
+                        <tbody>
+                            <tr>
+                                <th>i</th>
+                                <th>Poid Wi</th>
+                                <th>Valeur Vi</th>
+                            </tr>
+                            <tr>
+                                <td>1</td>
+                                <td>
+                                    <input type="number" min="1" max="100000" class="form-control" required>
+                                </td>
+                                <td>
+                                    <input type="number" min="1" max="100000" class="form-control" required>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-1"></div>
+            <div class="col-6">
+                <div class="row">
+                    <button type="button" id="test" class="btn btn-outline-dark">Résoudre</button>
+                    <label id="labelGen" class="text-danger text-center p-1"></label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="p-3"></div>
+    <div class="p-3"></div>
+</body>
+<footer class="text-center text-lg-start fixed-bottom">
+    <div style="background-color:#000000; opacity: 83%;">
+        <div class="text-center p-1">
+            <p class="text-light">
+                Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved | Bilal Belli
+            </p>
+        </div>
+    </div>
+</footer>
+<script>
+// Enable or Disable button
+    let empty = true;
+    function enableDisableButton(){
+        if (document.getElementById('poidMax').value == ""){
+            empty = true;
+        } else {
+            empty = false;
+        }
+        if (empty == false){
+            document.getElementById('createTableOfEffectivesID').disabled = false;
+        } else {
+            document.getElementById('createTableOfEffectivesID').disabled = true;
+        }
+    }
+// Create and Render table
+    function createTableOfEffectives(){
+        let table = document.getElementById("tableOfEffictives");
+        let k = document.getElementById("tableOfEffictives").rows.length;
+        let row = table.insertRow(k);
+        let cell0 = row.insertCell(0);
+        let cell1 = row.insertCell(1);
+        let cell2 = row.insertCell(2);
+        let output = "<input type=\"number\" min=\"1\" max=\"100000\" class=\"form-control\" required>"
+        cell0.innerHTML = k;
+        cell1.innerHTML = output;
+        cell2.innerHTML = output;
+    }
+
+// Controle des champs non remplis
+    document.getElementById("test").onclick = function() {
+        let allAreFilled = true;
+        document.querySelectorAll("[required]").forEach(function(i) {
+            if (i.value == "") { allAreFilled = false;  return; }
+        })
+        if (!allAreFilled) {
+            document.getElementById('labelGen').innerHTML = "Remplir tout les champs";
+        } else {
+            document.getElementById('labelGen').innerHTML = "";
+            constructionTable();
+        }
+    }
+
+// construction de la Table des donnes
+    function constructionTable(){
+        let table = document.getElementById("tableOfEffictives");
+        for (let k=1; k<table.rows.length ;k++){
+            let rowI = table.rows[k].cells;
+            console.log(rowI[0].innerHTML);
+            console.log(rowI[1].children[0].value);
+            console.log(rowI[2].children[0].value);
+        }
+    }
+</script>
+</html>
