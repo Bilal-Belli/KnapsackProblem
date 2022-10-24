@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js" integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous"></script>
     <title>TP1 TPRO Déroulement</title>
 </head>
-<body>
+<body style="background-image: url('./icon/bg.png');background-repeat: no-repeat;background-attachment: fixed;background-size: 100% 100%;">
     <nav class="navbar navbar-light bg-dark">
         <div class="container-fluid justify-content-center">
             <span class="navbar-brand mb-0 h1">
@@ -60,6 +60,20 @@
                     <button type="button" id="test" class="btn btn-outline-dark">Résoudre</button>
                     <label id="labelGen" class="text-danger text-center p-1"></label>
                 </div>
+                <div class="row">
+                    <label id="labelResultTab" class="text-success text-center p-1"></label>
+                    </div>
+                    <div id="resultsTable" class="table-responsive">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-5"></div>
+            <div class="col-1"></div>
+            <div class="col-6">
+                <label id="labelResultMax" class="text-success text-center p-1"></label>
+                <input type="text" id="ResultMax" readonly hidden value="0">
             </div>
         </div>
     </div>
@@ -77,8 +91,8 @@
 </footer>
 <script>
 // Enable or Disable button
-    let empty = true;
     function enableDisableButton(){
+        let empty = true;
         if (document.getElementById('poidMax').value == ""){
             empty = true;
         } else {
@@ -90,6 +104,7 @@
             document.getElementById('createTableOfEffectivesID').disabled = true;
         }
     }
+
 // Create and Render table
     function createTableOfEffectives(){
         let table = document.getElementById("tableOfEffictives");
@@ -112,21 +127,115 @@
         })
         if (!allAreFilled) {
             document.getElementById('labelGen').innerHTML = "Remplir tout les champs";
+            document.getElementById('resultsTable').innerHTML = "";
+            document.getElementById('labelResultTab').innerHTML = "";
+            document.getElementById('labelResultMax').innerHTML = "";
+            document.getElementById('ResultMax').hidden = true;
         } else {
             document.getElementById('labelGen').innerHTML = "";
             constructionTable();
         }
     }
+</script>
+<script>
+// declaration des variables globales
+    let matriceObjets = [[], []];
+    let matriceChoix = [];
+    let matriceResultats = [];
+    let poidMax = document.getElementById("poidMax").value;
+    let nbObjets = document.getElementById("tableOfEffictives").rows.length -1;
+    let MAX_VAL;
 
 // construction de la Table des donnes
     function constructionTable(){
+        matriceObjets = [[], []];
         let table = document.getElementById("tableOfEffictives");
         for (let k=1; k<table.rows.length ;k++){
             let rowI = table.rows[k].cells;
-            console.log(rowI[0].innerHTML);
-            console.log(rowI[1].children[0].value);
-            console.log(rowI[2].children[0].value);
+            matriceObjets[0][k-1] = rowI[1].children[0].value;
+            matriceObjets[1][k-1] = rowI[2].children[0].value;
+            // console.log(rowI[0].innerHTML);
+            // console.log(rowI[1].children[0].value);
+            // console.log(rowI[2].children[0].value);
         }
+        // console.log(matriceObjets);
+        initialisationTableDeSolutionDynamique();
+    }
+
+// 
+    function initialisationTableDeSolutionDynamique(){
+        poidMax = document.getElementById("poidMax").value;
+        nbObjets = document.getElementById("tableOfEffictives").rows.length -1;
+        for (let x=0;x<=nbObjets+1;x++){
+            matriceChoix[x] = 0;
+            for (let u=0;u<=poidMax;u++){
+                matriceResultats[x] = [];
+            }
+        }
+        for (let u=0;u<=poidMax;u++){
+            matriceResultats[0][u] = u;
+            matriceResultats[1][u] = 0;
+        }
+        // console.log(matriceChoix);
+        // console.log(matriceResultats);
+        solution();   
+    }
+
+// 
+    function solution(){
+        // algorithme dynamique
+        for (let i=1;i<=nbObjets;i++){
+            for (let c=0;c<=poidMax;c++){
+                // console.log("c "+c+" i "+i);
+                if (c >= matriceObjets[0][i-1]){
+                    // max
+                    let intWithoutConcat = Number.parseInt(matriceResultats[i][c-matriceObjets[0][i-1]])+Number.parseInt(matriceObjets[1][i-1]);
+                    if (matriceResultats[i][c] < intWithoutConcat){
+                        matriceResultats[i+1][c] = Number.parseInt(intWithoutConcat);
+                    } else {
+                        matriceResultats[i+1][c] = Number.parseInt(matriceResultats[i][c]);
+                    }
+                } else {
+                    matriceResultats[i+1][c] = Number.parseInt(matriceResultats[i][c]);
+                }
+            }
+        }
+        console.log(matriceResultats);
+        console.log("La valeur maximal dans le sac a dos qui respecte la contrainte est :"+matriceResultats[nbObjets+1][poidMax]);
+        MAX_VAL = Number.parseInt(matriceResultats[nbObjets+1][poidMax]);
+        appendResultTable();
+        // objetsPourChoisir();
+    }
+
+// 
+    function appendResultTable(){
+        let cTable = document.createElement('table');
+        cTable.classList.add('table');
+        cTable.classList.add('table-bordered');
+        let tableBdy = document.createElement('tbody');
+        for (let ii=0 ; ii<matriceResultats.length ; ii++){
+            let tableR = document.createElement('tr');
+            for ( let jj = 0 ; jj <= poidMax ; jj++ ) {
+                let tableD = document.createElement('td');
+                tableD.innerHTML = matriceResultats[ii][jj];
+                tableR.appendChild(tableD);
+            }
+            tableBdy.appendChild(tableR);
+        }
+        cTable.appendChild(tableBdy);
+        document.getElementById('resultsTable').innerHTML = "";
+        document.getElementById('labelResultTab').innerHTML = "La Table de Déroulement de l\'Algorithme";
+        document.getElementById('resultsTable').appendChild(cTable);
+        document.getElementById('labelResultMax').innerHTML = "La valeur Maximal est:";
+        document.getElementById('ResultMax').readonly =false;
+        document.getElementById('ResultMax').value = MAX_VAL;
+        document.getElementById('ResultMax').readonly =true;
+        document.getElementById('ResultMax').hidden = false;
+    }
+
+// 
+    function objetsPourChoisir(){
+
     }
 </script>
 </html>
