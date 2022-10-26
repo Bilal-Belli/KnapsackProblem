@@ -62,13 +62,18 @@
                 </div>
                 <div class="row">
                     <label id="labelResultTab" class="text-success text-center p-1"></label>
-                    </div>
                     <div id="resultsTable" class="table-responsive">
                     </div>
                 </div>
+                <div class="row">
+                    <label id="labelResultMax" class="text-success text-center p-1"></label>
+                </div>
+                <div class="row">
+                    <label id="ResultOBJ" class="text-success text-center p-1"></label>
+                </div>
             </div>
         </div>
-        <div class="row">
+        <!-- <div class="row">
             <div class="col-5"></div>
             <div class="col-1"></div>
             <div class="col-6">
@@ -76,6 +81,13 @@
                 <input type="text" id="ResultMax" readonly hidden value="0">
             </div>
         </div>
+        <div class="row">
+            <div class="col-5"></div>
+            <div class="col-1"></div>
+            <div class="col-6">
+                <label id="ResultOBJ" class="text-success text-center p-1"></label>
+            </div>
+        </div> -->
     </div>
     <div class="p-3"></div>
     <div class="p-3"></div>
@@ -130,7 +142,7 @@
             document.getElementById('resultsTable').innerHTML = "";
             document.getElementById('labelResultTab').innerHTML = "";
             document.getElementById('labelResultMax').innerHTML = "";
-            document.getElementById('ResultMax').hidden = true;
+            document.getElementById('ResultOBJ').innerHTML = "";
         } else {
             document.getElementById('labelGen').innerHTML = "";
             constructionTable();
@@ -162,7 +174,7 @@
         initialisationTableDeSolutionDynamique();
     }
 
-// 
+// initialisation de la Table De Solution Dynamique (les deux premieres lignes)
     function initialisationTableDeSolutionDynamique(){
         poidMax = document.getElementById("poidMax").value;
         nbObjets = document.getElementById("tableOfEffictives").rows.length -1;
@@ -181,7 +193,7 @@
         solution();   
     }
 
-// 
+// remplissage de la table des solutions
     function solution(){
         // algorithme dynamique
         for (let i=1;i<=nbObjets;i++){
@@ -204,10 +216,10 @@
         console.log("La valeur maximal dans le sac a dos qui respecte la contrainte est :"+matriceResultats[nbObjets+1][poidMax]);
         MAX_VAL = Number.parseInt(matriceResultats[nbObjets+1][poidMax]);
         appendResultTable();
-        // objetsPourChoisir();
+        objetsPourChoisir();
     }
 
-// 
+// c'est juste l'interface graphique (la table)
     function appendResultTable(){
         let cTable = document.createElement('table');
         cTable.classList.add('table');
@@ -226,16 +238,82 @@
         document.getElementById('resultsTable').innerHTML = "";
         document.getElementById('labelResultTab').innerHTML = "La Table de Déroulement de l\'Algorithme";
         document.getElementById('resultsTable').appendChild(cTable);
-        document.getElementById('labelResultMax').innerHTML = "La valeur Maximal est:";
-        document.getElementById('ResultMax').readonly =false;
-        document.getElementById('ResultMax').value = MAX_VAL;
-        document.getElementById('ResultMax').readonly =true;
-        document.getElementById('ResultMax').hidden = false;
+        document.getElementById('labelResultMax').innerHTML = "La valeur Maximal est: "+MAX_VAL;
     }
 
-// 
+// l'algorithme pour la déduction des objets a utilisé
     function objetsPourChoisir(){
+        for (let x=0;x<=nbObjets+1;x++){
+            matriceChoix[x] = 0;
+        }
+        let i = nbObjets;
+        if (Number.parseInt(matriceResultats[i+1][poidMax]) == Number.parseInt(matriceResultats[i][poidMax])){
+            matriceChoix[i+1] = Number.parseInt(0);
+            let p=nbObjets;
+            for (p=nbObjets;p>0;p--){
+                if (Number.parseInt(matriceResultats[p+1][poidMax]) == Number.parseInt(matriceResultats[p][poidMax])){
+                    matriceChoix[p+1] = Number.parseInt(0);
+                } else {
+                    matriceChoix[p+1] = Number.parseInt(1);
+                    break;
+                }
+            }
+            let k = Number.parseInt(matriceResultats[p+1][poidMax]) - Number.parseInt(matriceObjets[1][p-1]);
+            if (k != 0){
+                for (j=nbObjets-p-1;j>0;j--){
+                    if (k != 0){
+                        if (k == Number.parseInt(matriceResultats[j][poidMax])) {
+                            matriceChoix[j] = 1;
+                            k = Number.parseInt(matriceResultats[j][poidMax]) - Number.parseInt(matriceObjets[1][j-1]);
+                        } else {
+                            if (k > Number.parseInt(matriceResultats[j][poidMax])) {
+                                matriceChoix[j+1] = 1;
+                                k = k - Number.parseInt(matriceObjets[1][j]);
+                            } else {
+                                matriceChoix[j] = 0;
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        } else {
+            matriceChoix[i+1] = 1;
+            k = Number.parseInt(matriceResultats[i+1][poidMax]) - Number.parseInt(matriceObjets[1][i-1]);
+            if (k != 0){
+                for (j=nbObjets;j>0;j--){
+                    if (k != 0) {
+                        if (k == Number.parseInt(matriceResultats[j][poidMax])){
+                            matriceChoix[j] = 1;
+                            k = Number.parseInt(matriceResultats[j][poidMax]) - Number.parseInt(matriceObjets[1][j-1]);
+                        } else {
+                            if (k > Number.parseInt(matriceResultats[j][poidMax])){
+                                matriceChoix[j+1] = 1;
+                                k = k - Number.parseInt(matriceObjets[1][j]);
+                            } else {
+                                matriceChoix[j] = 0;
+                            }
+                        }
+                    } else {
+                        break;
+                    }
+                }
+            }
+        }
+        console.log("la nouvelle matrice des choix est : "+matriceChoix);
+        appendObjectsSolution();
+    }
 
+// les solutions comme objets
+    function appendObjectsSolution(){
+        let output = "Les Objets à remmettre dans le Sac à dos sont : ";
+        for (oo=2;oo<matriceChoix.length;oo++){
+            if (Number.parseInt(matriceChoix[oo])== 1){
+                output += " i = "+(oo-1)+",";
+            }
+        }
+        document.getElementById('ResultOBJ').innerHTML = output;
     }
 </script>
 </html>
