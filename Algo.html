@@ -260,17 +260,19 @@
             }
             let k = Number.parseInt(matriceResultats[p+1][poidMax]) - Number.parseInt(matriceObjets[1][p-1]);
             if (k != 0){
-                for (j=nbObjets-p-1;j>0;j--){
+                for (j=nbObjets-p+2;j>0;j--){
                     if (k != 0){
                         if (k == Number.parseInt(matriceResultats[j][poidMax])) {
                             matriceChoix[j] = 1;
-                            k = Number.parseInt(matriceResultats[j][poidMax]) - Number.parseInt(matriceObjets[1][j-1]);
+                            k = Number.parseInt(matriceResultats[j][poidMax]) - Number.parseInt(matriceObjets[1][j-2]);
                         } else {
                             if (k > Number.parseInt(matriceResultats[j][poidMax])) {
                                 matriceChoix[j+1] = 1;
                                 k = k - Number.parseInt(matriceObjets[1][j]);
                             } else {
-                                matriceChoix[j] = 0;
+                                if (Number.parseInt(matriceChoix[j]) != 1){
+                                    matriceChoix[j] = 0;
+                                }
                             }
                         }
                     } else {

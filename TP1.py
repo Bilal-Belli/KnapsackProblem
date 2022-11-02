@@ -45,20 +45,25 @@ def EnterData():
                 matriceChoix[p+1] = 1
                 break
         k = matriceResultats[p+1][poidMax] - matriceObjets[1][p-1]
-        print(k)
         if (k != 0):
-            for j in range(nbObjets-p-1,0,-1):
+            for j in range(nbObjets-p+2,0,-1):
+                # print(k)
                 if (k != 0):
+                    print(matriceResultats[j][poidMax])
                     if (k == matriceResultats[j][poidMax]):
                         matriceChoix[j] = 1
-                        k = matriceResultats[j][poidMax] - matriceObjets[1][j-1]
+                        # print(matriceObjets[1][j-2])
+                        k = matriceResultats[j][poidMax] - matriceObjets[1][j-2]
                     else:
                         # Automatiquement ils sont croissent (incrementations)
                         if (k > matriceResultats[j][poidMax]):
                             matriceChoix[j+1] = 1
+                            # print(matriceResultats[j][poidMax])
+                            # print(matriceResultats[j+1][poidMax])
                             k = k - matriceObjets[1][j]
                         else: # k < matriceResultats[j][poidMax]
-                            matriceChoix[j] = 0
+                            if (matriceChoix[j] != 1):
+                                matriceChoix[j] = 0
                 else:
                     break
     else:
