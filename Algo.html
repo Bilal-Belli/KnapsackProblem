@@ -73,21 +73,6 @@
                 </div>
             </div>
         </div>
-        <!-- <div class="row">
-            <div class="col-5"></div>
-            <div class="col-1"></div>
-            <div class="col-6">
-                <label id="labelResultMax" class="text-success text-center p-1"></label>
-                <input type="text" id="ResultMax" readonly hidden value="0">
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-5"></div>
-            <div class="col-1"></div>
-            <div class="col-6">
-                <label id="ResultOBJ" class="text-success text-center p-1"></label>
-            </div>
-        </div> -->
     </div>
     <div class="p-3"></div>
     <div class="p-3"></div>
@@ -153,6 +138,7 @@
 // declaration des variables globales
     let matriceObjets = [[], []];
     let matriceChoix = [];
+    let use = [];
     let matriceResultats = [];
     let poidMax = document.getElementById("poidMax").value;
     let nbObjets = document.getElementById("tableOfEffictives").rows.length -1;
@@ -166,11 +152,7 @@
             let rowI = table.rows[k].cells;
             matriceObjets[0][k-1] = rowI[1].children[0].value;
             matriceObjets[1][k-1] = rowI[2].children[0].value;
-            // console.log(rowI[0].innerHTML);
-            // console.log(rowI[1].children[0].value);
-            // console.log(rowI[2].children[0].value);
         }
-        // console.log(matriceObjets);
         initialisationTableDeSolutionDynamique();
     }
 
@@ -188,8 +170,6 @@
             matriceResultats[0][u] = u;
             matriceResultats[1][u] = 0;
         }
-        // console.log(matriceChoix);
-        // console.log(matriceResultats);
         solution();   
     }
 
@@ -198,12 +178,11 @@
         // algorithme dynamique
         for (let i=1;i<=nbObjets;i++){
             for (let c=0;c<=poidMax;c++){
-                // console.log("c "+c+" i "+i);
                 if (c >= matriceObjets[0][i-1]){
-                    // max
                     let intWithoutConcat = Number.parseInt(matriceResultats[i][c-matriceObjets[0][i-1]])+Number.parseInt(matriceObjets[1][i-1]);
                     if (matriceResultats[i][c] < intWithoutConcat){
                         matriceResultats[i+1][c] = Number.parseInt(intWithoutConcat);
+                        
                     } else {
                         matriceResultats[i+1][c] = Number.parseInt(matriceResultats[i][c]);
                     }
@@ -212,11 +191,15 @@
                 }
             }
         }
-        console.log(matriceResultats);
-        console.log("La valeur maximal dans le sac a dos qui respecte la contrainte est :"+matriceResultats[nbObjets+1][poidMax]);
         MAX_VAL = Number.parseInt(matriceResultats[nbObjets+1][poidMax]);
         appendResultTable();
-        objetsPourChoisir();
+        var array1=[];
+        var array2=[];
+        for(let i=0;i<nbObjets;i++){
+            array1[i] = matriceObjets[0][i]; //w
+            array2[i] = matriceObjets[1][i]; //v
+        } 
+        main(array2,array1,poidMax);
     }
 
 // c'est juste l'interface graphique (la table)
@@ -241,78 +224,47 @@
         document.getElementById('labelResultMax').innerHTML = "La valeur Maximal est: "+MAX_VAL;
     }
 
-// l'algorithme pour la déduction des objets a utilisé
-    function objetsPourChoisir(){
-        for (let x=0;x<=nbObjets+1;x++){
-            matriceChoix[x] = 0;
-        }
-        let i = nbObjets;
-        if (Number.parseInt(matriceResultats[i+1][poidMax]) == Number.parseInt(matriceResultats[i][poidMax])){
-            matriceChoix[i+1] = Number.parseInt(0);
-            let p=nbObjets;
-            for (p=nbObjets;p>0;p--){
-                if (Number.parseInt(matriceResultats[p+1][poidMax]) == Number.parseInt(matriceResultats[p][poidMax])){
-                    matriceChoix[p+1] = Number.parseInt(0);
-                } else {
-                    matriceChoix[p+1] = Number.parseInt(1);
-                    break;
-                }
-            }
-            let k = Number.parseInt(matriceResultats[p+1][poidMax]) - Number.parseInt(matriceObjets[1][p-1]);
-            if (k != 0){
-                for (j=nbObjets-p+2;j>0;j--){
-                    if (k != 0){
-                        if (k == Number.parseInt(matriceResultats[j][poidMax])) {
-                            matriceChoix[j] = 1;
-                            k = Number.parseInt(matriceResultats[j][poidMax]) - Number.parseInt(matriceObjets[1][j-2]);
-                        } else {
-                            if (k > Number.parseInt(matriceResultats[j][poidMax])) {
-                                matriceChoix[j+1] = 1;
-                                k = k - Number.parseInt(matriceObjets[1][j]);
-                            } else {
-                                if (Number.parseInt(matriceChoix[j]) != 1){
-                                    matriceChoix[j] = 0;
-                                }
-                            }
-                        }
-                    } else {
-                        break;
-                    }
-                }
-            }
-        } else {
-            matriceChoix[i+1] = 1;
-            k = Number.parseInt(matriceResultats[i+1][poidMax]) - Number.parseInt(matriceObjets[1][i-1]);
-            if (k != 0){
-                for (j=nbObjets;j>0;j--){
-                    if (k != 0) {
-                        if (k == Number.parseInt(matriceResultats[j][poidMax])){
-                            matriceChoix[j] = 1;
-                            k = Number.parseInt(matriceResultats[j][poidMax]) - Number.parseInt(matriceObjets[1][j-1]);
-                        } else {
-                            if (k > Number.parseInt(matriceResultats[j][poidMax])){
-                                matriceChoix[j+1] = 1;
-                                k = k - Number.parseInt(matriceObjets[1][j]);
-                            } else {
-                                matriceChoix[j] = 0;
-                            }
-                        }
-                    } else {
-                        break;
-                    }
+// C'est la fonction pour extraire les Objets choisies
+    function main(v,w,W){
+        var n = v.length;
+        var c = [];
+        for(var i = 0; i <= n ; i++){
+            c[i] = [];
+            use[i] = 0;
+            for(var j = 0; j <= W ; j++){
+                if(i == 0 || j == 0){
+                    c[i][j] = 0;
                 }
             }
         }
-        console.log("la nouvelle matrice des choix est : "+matriceChoix);
-        appendObjectsSolution();
+        v.unshift (0); // 0 items with a value of 0
+        w.unshift (0); // items 0, 0 wt.
+        for(var i = 1; i <= n; i++){
+            for(var j = 1; j <= W; j++ ){
+                if(j < w[i]){
+                    c[i][j] = c[i-1][j];
+                }else{
+                    c[i][j] = Math.max(c[i-1][j],c[i-1][j-w[i]]+v[i]);
+                }
+            }
+        }
+        var j = W;
+        for(var i = n; i > 0; i--){
+            if(c[i][j] > c[i-1][j]){
+                use[i] = 1;
+                j=j-w[i];
+            }
+        }
+        appendObjectsSolution___();
     }
 
-// les solutions comme objets
-    function appendObjectsSolution(){
+// C'est la fonction qui permet de afficher les objets séléctionnées
+    function appendObjectsSolution___(){
+        // console.log(use);
         let output = "Les Objets à remmettre dans le Sac à dos sont : ";
-        for (oo=2;oo<matriceChoix.length;oo++){
-            if (Number.parseInt(matriceChoix[oo])== 1){
-                output += " i = "+(oo-1)+",";
+        for (oo=0;oo<use.length;oo++){
+            if (Number.parseInt(use[oo])== 1){
+                output += " i = "+(oo)+",";
             }
         }
         document.getElementById('ResultOBJ').innerHTML = output;
