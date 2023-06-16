@@ -32,5 +32,3 @@ Contributions are welcome! If you have any suggestions, improvements, or bug fix
 
 ### License
 This project is licensed under the MIT License. Feel free to use and modify the code for your own purposes.
-
-Note: Make sure to update the license file (LICENSE) if you choose a different license for your project.
